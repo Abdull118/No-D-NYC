@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "No-D NYC",
-    "slug": "No-D NYC",
+    "name": "No-D-NYC",
+    "slug": "No-D-NYC",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -13,6 +13,9 @@
       "bundleIdentifier": "com.nod.nyc",
       "config": {
         "googleMapsApiKey": "AIzaSyAqT0LU9bRtMFlB1z_AVgX6-BVaF3P6oaU"
+      },
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -21,7 +24,11 @@
         "googleMaps": {
           "apiKey": "AIzaSyAqT0LU9bRtMFlB1z_AVgX6-BVaF3P6oaU"
         }
-      }
+      },
+      "permissions": [
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -39,6 +46,14 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "b689e68e-e1d5-43ed-9f14-a9966dded6db"
+      }
     }
   }
 }
