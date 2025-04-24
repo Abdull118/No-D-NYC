@@ -1,0 +1,44 @@
+{
+  "expo": {
+    "name": "No-D NYC",
+    "slug": "No-D NYC",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "myapp",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.nod.nyc",
+      "config": {
+        "googleMapsApiKey": "AIzaSyAqT0LU9bRtMFlB1z_AVgX6-BVaF3P6oaU"
+      }
+    },
+    "android": {
+      "package": "com.nod.nyc",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyAqT0LU9bRtMFlB1z_AVgX6-BVaF3P6oaU"
+        }
+      }
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow NoD NYC to use your location."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

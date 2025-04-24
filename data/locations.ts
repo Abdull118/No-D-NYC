@@ -1,0 +1,353 @@
+import { MapPin, Chrome as Home, Pill, Heart, Coffee, Scale, Bus, Wifi, ShowerHead as Shower, Phone } from 'lucide-react-native';
+
+export type LocationType = 
+  | 'shelter'
+  | 'treatment'
+  | 'harmReduction'
+  | 'food'
+  | 'legal'
+  | 'transportation'
+  | 'wifi'
+  | 'hygiene'
+  | 'emergency'
+  | 'community';
+
+export interface LocationInfo {
+  id: string;
+  name: string;
+  address: string;
+  coordinates: {
+    latitude: number;
+    longitude: number;
+  };
+  type: LocationType;
+  services?: string[];
+  hours?: string;
+  phone?: string;
+}
+
+export const locationTypes = {
+  shelter: {
+    name: 'Shelters',
+    color: '#FF4B4B',
+    icon: Home,
+  },
+  treatment: {
+    name: 'Treatment Centers',
+    color: '#8B5CF6',
+    icon: Pill,
+  },
+  harmReduction: {
+    name: 'Harm Reduction',
+    color: '#EC4899',
+    icon: Heart,
+  },
+  food: {
+    name: 'Food Services',
+    color: '#22C55E',
+    icon: Coffee,
+  },
+  legal: {
+    name: 'Legal Aid',
+    color: '#EAB308',
+    icon: Scale,
+  },
+  transportation: {
+    name: 'Transportation',
+    color: '#3B82F6',
+    icon: Bus,
+  },
+  wifi: {
+    name: 'Wi-Fi & Charging',
+    color: '#06B6D4',
+    icon: Wifi,
+  },
+  hygiene: {
+    name: 'Hygiene Services',
+    color: '#14B8A6',
+    icon: Shower,
+  },
+  emergency: {
+    name: 'Emergency Services',
+    color: '#DC2626',
+    icon: Phone,
+  },
+  community: {
+    name: 'Community Centers',
+    color: '#F97316',
+    icon: MapPin,
+  },
+};
+
+export const locations: LocationInfo[] = [
+  {
+    id: '1',
+    name: '30th Street Mens Intake Shelter',
+    address: '400 East 30th Street, New York, NY 10016',
+    coordinates: { latitude: 40.7424, longitude: -73.9767 },
+    type: 'shelter',
+    services: ['Emergency Shelter', 'Intake Processing', 'Case Management'],
+    hours: '24/7',
+    phone: '(212) 481-0771',
+  },
+  {
+    id: '2',
+    name: 'Bellevue Mens Shelter',
+    address: '400 East 30th Street, New York, NY 10016',
+    coordinates: { latitude: 40.7421, longitude: -73.9762 },
+    type: 'shelter',
+    services: ['Emergency Shelter', 'Medical Services', 'Mental Health Services'],
+    hours: '24/7',
+    phone: '(212) 562-5767',
+  },
+  {
+    id: '3',
+    name: 'NYC Treatment Centers',
+    address: '25 W 35th St, New York, NY 10001',
+    coordinates: { latitude: 40.7488, longitude: -73.9856 },
+    type: 'treatment',
+    services: ['Methadone Treatment', 'Counseling', 'Support Groups'],
+    hours: 'Mon-Fri 6AM-2PM, Sat 6AM-12PM',
+    phone: '(212) 947-4974',
+  },
+  {
+    id: '4',
+    name: 'Bridge Back to Life Center',
+    address: '175 Remsen St, Brooklyn, NY 11201',
+    coordinates: { latitude: 40.6932, longitude: -73.9923 },
+    type: 'treatment',
+    services: ['Outpatient Treatment', 'Suboxone Treatment', 'Individual Therapy'],
+    hours: 'Mon-Fri 9AM-5PM',
+    phone: '(718) 852-5552',
+  },
+  {
+    id: '5',
+    name: 'Holy Apostles Soup Kitchen',
+    address: '296 9th Ave, New York, NY 10001',
+    coordinates: { latitude: 40.7495, longitude: -73.9989 },
+    type: 'food',
+    services: ['Hot Meals', 'Food Pantry', 'Social Services'],
+    hours: 'Mon-Fri 10:30AM-12:30PM',
+    phone: '(212) 924-0167',
+  },
+  {
+    id: '6',
+    name: 'Lower Eastside Harm Reduction Center',
+    address: '25 Allen Street, New York, NY 10002',
+    coordinates: { latitude: 40.7155, longitude: -73.9935 },
+    type: 'harmReduction',
+    services: ['Needle Exchange', 'Naloxone Distribution', 'HIV Testing'],
+    hours: 'Mon-Fri 9AM-5PM',
+    phone: '(212) 226-6333',
+  },
+  {
+    id: '7',
+    name: 'Legal Aid Society',
+    address: '199 Water Street, New York, NY 10038',
+    coordinates: { latitude: 40.7067, longitude: -74.0021 },
+    type: 'legal',
+    services: ['Legal Consultation', 'Housing Rights', 'Public Benefits'],
+    hours: 'Mon-Fri 9AM-5PM',
+    phone: '(212) 577-3300',
+  },
+  {
+    id: '8',
+    name: 'The Connection - Drop-in Center',
+    address: '127 West 127th Street, New York, NY 10027',
+    coordinates: { latitude: 40.8094, longitude: -73.9463 },
+    type: 'hygiene',
+    services: ['Showers', 'Laundry', 'Clothing Distribution', 'Mail Services'],
+    hours: 'Mon-Sun 7AM-3PM',
+    phone: '(212) 961-0340',
+  },
+  {
+    id: '9',
+    name: 'NYPL - Stavros Niarchos Foundation Library',
+    address: '455 Fifth Avenue, New York, NY 10016',
+    coordinates: { latitude: 40.7529, longitude: -73.9827 },
+    type: 'wifi',
+    services: ['Free Wi-Fi', 'Computer Access', 'Charging Stations', 'Air Conditioning'],
+    hours: 'Mon-Sat 8AM-8PM, Sun 10AM-6PM',
+    phone: '(917) 275-6975',
+  },
+  {
+    id: '10',
+    name: 'Grand Central Neighborhood Social Services',
+    address: '120 East 32nd Street, New York, NY 10016',
+    coordinates: { latitude: 40.7456, longitude: -73.9815 },
+    type: 'community',
+    services: ['Case Management', 'Housing Assistance', 'Mental Health Services'],
+    hours: 'Mon-Fri 9AM-5PM',
+    phone: '(212) 883-0680',
+  },
+  {
+    id: '11',
+    name: 'VIP Community Services',
+    address: '1910 Arthur Avenue, Bronx, NY 10457',
+    coordinates: { latitude: 40.8447, longitude: -73.8947 },
+    type: 'treatment',
+    services: ['Substance Use Disorder Treatment', 'Housing Assistance', 'Mental Health Counseling'],
+    hours: 'Mon-Fri 8AM-6PM',
+    phone: '(718) 583-5150',
+  },
+  {
+    id: '12',
+    name: 'HELP Women’s Center',
+    address: '116 Williams Avenue, Brooklyn, NY 11207',
+    coordinates: { latitude: 40.6778, longitude: -73.9189 },
+    type: 'shelter',
+    services: ['Emergency Shelter', 'Women’s Intake', 'Case Management'],
+    hours: '24/7',
+    phone: '(718) 483-7700',
+  },
+  {
+    id: '13',
+    name: 'Franklin Women’s Intake Shelter',
+    address: '1122 Franklin Avenue, Bronx, NY 10456',
+    coordinates: { latitude: 40.8281, longitude: -73.9057 },
+    type: 'shelter',
+    services: ['Intake Processing', 'Case Management'],
+    hours: '24/7',
+    phone: '311',
+  },
+  {
+    id: '14',
+    name: 'PATH Family Intake Center',
+    address: '151 East 151st Street, Bronx, NY 10451',
+    coordinates: { latitude: 40.8196, longitude: -73.9252 },
+    type: 'shelter',
+    services: ['Intake Processing', 'Case Management'],
+    hours: '24/7',
+    phone: '(718) 503-6400',
+  },
+  {
+    id: '15',
+    name: 'Beth Israel Med Center Cooper Square Methadone Clinic',
+    address: '10 Union Square East, New York, NY 10003',
+    coordinates: { latitude: 40.7359, longitude: -73.9895 },
+    type: 'treatment',
+    services: ['Methadone Treatment', 'Counseling', 'Support Services'],
+    hours: 'Mon-Fri 6AM-2PM, Sat 6AM-12PM',
+    phone: '(212) 420-4028',
+  },
+  {
+    id: '16',
+    name: 'Gotham Health Gouverneur Methadone Clinic',
+    address: '227 Madison Street, New York, NY 10002',
+    coordinates: { latitude: 40.7091, longitude: -73.9881 },
+    type: 'treatment',
+    services: ['Methadone Treatment', 'Counseling', 'Primary Care'],
+    hours: 'Mon-Fri 6AM-3PM',
+    phone: '(212) 340-3794',
+  },
+  {
+    id: '17',
+    name: 'New York Harm Reduction Educators',
+    address: '104 East 126th Street, New York, NY 10035',
+    coordinates: { latitude: 40.8070, longitude: -73.9348 },
+    type: 'harmReduction',
+    services: ['Needle Exchange', 'Naloxone Distribution', 'HIV Testing'],
+    hours: 'Mon-Fri 9AM-5PM',
+    phone: '(929) 309-7481',
+  },
+  {
+    id: '18',
+    name: 'New York Common Pantry',
+    address: '8 East 109th Street, New York, NY 10029',
+    coordinates: { latitude: 40.7927, longitude: -73.9517 },
+    type: 'food',
+    services: ['Food Pantry', 'Hot Meals', 'Showers', 'Laundry'],
+    hours: 'Mon-Sat 9AM-4PM, Sun 2PM-6PM',
+    phone: '(917) 720-9700',
+  },
+  {
+    id: '19',
+    name: 'Legal Aid Society – Brooklyn Neighborhood Office',
+    address: '111 Livingston Street, Brooklyn, NY 11201',
+    coordinates: { latitude: 40.6914, longitude: -73.9898 },
+    type: 'legal',
+    services: ['Legal Consultation', 'Housing Rights', 'Public Benefits'],
+    hours: 'Mon-Fri 9AM-5PM',
+    phone: '(718) 722-3100',
+  },
+  {
+    id: '20',
+    name: 'LinkNYC Kiosk (Union Square)',
+    address: '14th Street & Union Square East, New York, NY 10003',
+    coordinates: { latitude: 40.7342, longitude: -73.9898 },
+    type: 'wifi',
+    services: ['Free Wi-Fi', 'Device Charging', 'Phone Calls', 'Information Services'],
+    hours: '24/7',
+    phone: '311',
+  },
+  {
+    id: '21',
+    name: 'Antonio Olivieri Drop-In Center',
+    address: '257 West 30th Street, New York, NY 10001',
+    coordinates: { latitude: 40.7510, longitude: -73.9916 },
+    type: 'hygiene',
+    services: ['Showers', 'Laundry', 'Restrooms', 'Meals'],
+    hours: 'Mon-Sun 7:30AM-8:30PM',
+    phone: '(212) 947-3211',
+  },
+  {
+    id: '22',
+    name: 'The Living Room',
+    address: '800 Barretto Street, Bronx, NY 10474',
+    coordinates: { latitude: 40.8278, longitude: -73.9075 },
+    type: 'hygiene',
+    services: ['Showers', 'Laundry', 'Meals', 'Case Management'],
+    hours: '24/7',
+    phone: '(718) 893-3606',
+  },
+  {
+    id: '23',
+    name: 'The Dwelling Place of NY',
+    address: '409 West 40th Street, New York, NY 10018',
+    coordinates: { latitude: 40.7576, longitude: -73.9934 },
+    type: 'shelter',
+    services: ['Emergency Shelter', 'Hot Meals', 'Case Management'],
+    hours: 'Wednesdays 5:30PM-6:30PM',
+    phone: '(212) 564-7887',
+  },
+  {
+    id: '24',
+    name: 'Coalition for the Homeless Outreach',
+    address: '129 Fulton Street, New York, NY 10038',
+    coordinates: { latitude: 40.7103, longitude: -74.0086 },
+    type: 'community',
+    services: ['Outreach Services', 'Case Management', 'Advocacy'],
+    hours: 'Mon-Fri 9AM-5PM',
+    phone: '(212) 776-2000',
+  },
+  {
+    id: '25',
+    name: 'Bryant Park Public Restroom & Wi-Fi',
+    address: 'Between West 40th & 42nd Streets, New York, NY 10018',
+    coordinates: { latitude: 40.7536, longitude: -73.9832 },
+    type: 'wifi',
+    services: ['Public Restrooms', 'Free Wi-Fi', 'Device Charging', 'Information Kiosk'],
+    hours: '24/7',
+    phone: '311',
+  },
+  {
+    id: '26',
+    name: 'LinkNYC Kiosk (Times Square)',
+    address: '42nd Street & Broadway, New York, NY 10036',
+    coordinates: { latitude: 40.7577, longitude: -73.9857 },
+    type: 'wifi',
+    services: ['Free Wi-Fi', 'Device Charging', 'Phone Calls', 'Information Services'],
+    hours: '24/7',
+    phone: '311',
+  },
+  {
+    id: '27',
+    name: 'Laundry Love at Fifth Avenue Presbyterian Church',
+    address: '12 West 12th Street, New York, NY 10011',
+    coordinates: { latitude: 40.7362, longitude: -73.9987 },
+    type: 'hygiene',
+    services: ['Free Laundry', 'Soap & Detergent Provided', 'Community Support Services'],
+    hours: 'Wed 5PM-8PM',
+    phone: '(212) 675-6150',
+  },
+];
