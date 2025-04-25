@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
   },
   locationCard: {
     position: 'absolute',
-    bottom: 20,
+    bottom: 70,
     left: 20,
     right: 20,
     borderRadius: 16,

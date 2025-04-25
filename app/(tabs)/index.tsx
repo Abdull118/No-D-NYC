@@ -66,7 +66,7 @@ export default function HelpNowScreen() {
       />
       <SafeAreaView style={styles.content}>
         <View style={styles.headerContainer}>
-          <Text style={styles.headerTitle}>NoDee NYC</Text>
+          <Text style={styles.headerTitle}>No-D NYC</Text>
           <Text style={styles.headerSubtitle}>Get Help Now</Text>
         </View>
         <View style={styles.grid}>
