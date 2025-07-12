@@ -6,23 +6,23 @@ import { BlurView } from 'expo-blur';
 
 const EMERGENCY_NUMBERS = [
   {
-    id: '911',
+    id: 'ambulance',
     number: '911',
     title: 'Emergency',
     description: 'Call 911',
-    icon: Phone,
+    icon: Ambulance,
     color: '#FF4B4B',
     gradient: ['#FF4B4B', '#D61C4E'],
   },
-  {
-    id: 'ambulance',
-    number: '911',
-    title: 'Ambulance',
-    description: 'Call Ambulance',
-    icon: Ambulance,
-    color: '#FF8F00',
-    gradient: ['#FF8F00', '#DB6300'],
-  },
+  // {
+  //   id: 'ambulance',
+  //   number: '911',
+  //   title: 'Ambulance',
+  //   description: 'Call Ambulance',
+  //   icon: Ambulance,
+  //   color: '#FF8F00',
+  //   gradient: ['#FF8F00', '#DB6300'],
+  // },
   {
     id: 'crisis',
     number: '988',
@@ -35,7 +35,16 @@ const EMERGENCY_NUMBERS = [
   {
     id: 'hopeny',
     number: '18778467369',
-    title: 'HOPENY',
+    title: 'HOPE NY',
+    description: 'Addiction Support',
+    icon: Pill,
+    color: '#3B82F6',
+    gradient: ['#3B82F6', '#1D4ED8'],
+  },
+  {
+    id: 'Never',
+    number: '18778467369',
+    title: 'Never Use Alone',
     description: 'Addiction Support',
     icon: Pill,
     color: '#3B82F6',

@@ -16,7 +16,8 @@ const RESOURCES = [
     id: 'id',
     title: 'Replace Lost ID',
     description: 'Information on getting a new ID in NYC',
-    comingSoon: true,
+    comingSoon: false,
+    url: 'https://dmv.ny.gov/non-driver-id/replace-a-non-driver-id?utm_source=chatgpt.com',
     gradient: ['#6B7280', '#4B5563'],
   },
   {
