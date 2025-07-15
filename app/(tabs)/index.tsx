@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, StyleSheet, Linking, Platform, ImageBackground } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Linking, Platform, ImageBackground, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Phone, Ambulance, Heart, Pill } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -12,7 +12,7 @@ const EMERGENCY_NUMBERS = [
     description: 'Call 911',
     icon: Ambulance,
     color: '#FF4B4B',
-    gradient: ['#FF4B4B', '#D61C4E'],
+    gradient: ['#FF4B4B', '#D61C4E'] as [string, string],
   },
   // {
   //   id: 'ambulance',
@@ -30,7 +30,7 @@ const EMERGENCY_NUMBERS = [
     description: 'Suicide & Crisis',
     icon: Heart,
     color: '#22C55E',
-    gradient: ['#22C55E', '#15803D'],
+    gradient: ['#22C55E', '#15803D'] as [string, string],
   },
   {
     id: 'hopeny',
@@ -39,7 +39,7 @@ const EMERGENCY_NUMBERS = [
     description: 'Addiction Support',
     icon: Pill,
     color: '#3B82F6',
-    gradient: ['#3B82F6', '#1D4ED8'],
+    gradient: ['#3B82F6', '#1D4ED8'] as [string, string],
   },
   {
     id: 'Never',
@@ -47,8 +47,8 @@ const EMERGENCY_NUMBERS = [
     title: 'Never Use Alone',
     description: 'Addiction Support',
     icon: Pill,
-    color: '#3B82F6',
-    gradient: ['#3B82F6', '#1D4ED8'],
+    color: '#F59E42',
+    gradient: ['#F59E42', '#F97316'] as [string, string],
   },
 ];
 
@@ -65,26 +65,23 @@ export default function HelpNowScreen() {
     }
   };
 
-  return (
-    <ImageBackground
-      source={{ uri: 'https://images.unsplash.com/photo-1515614466515-e512e497a047?q=80&w=2070&auto=format&fit=crop' }}
-      style={styles.container}>
-      <LinearGradient
-        colors={['rgba(0,0,0,0.7)', 'rgba(0,0,0,0.9)']}
-        style={StyleSheet.absoluteFill}
-      />
-      <SafeAreaView style={styles.content}>
-        <View style={styles.headerContainer}>
-          <Text style={styles.headerTitle}>No-D NYC</Text>
-          <Text style={styles.headerSubtitle}>Get Help Now</Text>
-        </View>
-        <View style={styles.grid}>
-          {EMERGENCY_NUMBERS.map((item) => (
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
+
+  // Arrange buttons in 2x2 grid for tablet, 1 row for phone
+  let gridContent;
+  if (isTablet) {
+    gridContent = (
+      <View style={styles.gridTablet}>
+        <View style={styles.gridRow}>
+          {EMERGENCY_NUMBERS.slice(0, 2).map((item) => (
             <TouchableOpacity
               key={item.id}
               onPress={() => handleCall(item.number)}
               accessibilityLabel={`Call ${item.title}`}
-              accessibilityHint={`Initiates a phone call to ${item.description}`}>
+              accessibilityHint={`Initiates a phone call to ${item.description}`}
+              style={styles.gridItemTablet}
+            >
               <LinearGradient
                 colors={item.gradient}
                 style={styles.button}
@@ -97,6 +94,68 @@ export default function HelpNowScreen() {
             </TouchableOpacity>
           ))}
         </View>
+        <View style={styles.gridRow}>
+          {EMERGENCY_NUMBERS.slice(2, 4).map((item) => (
+            <TouchableOpacity
+              key={item.id}
+              onPress={() => handleCall(item.number)}
+              accessibilityLabel={`Call ${item.title}`}
+              accessibilityHint={`Initiates a phone call to ${item.description}`}
+              style={styles.gridItemTablet}
+            >
+              <LinearGradient
+                colors={item.gradient}
+                style={styles.button}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}>
+                <item.icon color="white" size={32} strokeWidth={2.5} />
+                <Text style={styles.buttonTitle}>{item.title}</Text>
+                <Text style={styles.buttonDescription}>{item.description}</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+    );
+  } else {
+    gridContent = (
+      <View style={styles.grid}>
+        {EMERGENCY_NUMBERS.map((item) => (
+          <TouchableOpacity
+            key={item.id}
+            onPress={() => handleCall(item.number)}
+            accessibilityLabel={`Call ${item.title}`}
+            accessibilityHint={`Initiates a phone call to ${item.description}`}
+          >
+            <LinearGradient
+              colors={item.gradient}
+              style={styles.button}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}>
+              <item.icon color="white" size={32} strokeWidth={2.5} />
+              <Text style={styles.buttonTitle}>{item.title}</Text>
+              <Text style={styles.buttonDescription}>{item.description}</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        ))}
+      </View>
+    );
+  }
+
+  return (
+    <ImageBackground
+      source={{ uri: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2070&auto=format&fit=crop' }}
+      style={styles.container}>
+      <LinearGradient
+        colors={['rgba(0,0,0,0.7)', 'rgba(0,0,0,0.9)'] as [string, string]}
+        style={StyleSheet.absoluteFill}
+      />
+      <SafeAreaView style={styles.content}>
+        <View style={styles.headerContainer}>
+          <Text style={styles.headerTitle}>No-D NYC</Text>
+          <Text style={styles.headerSubtitle}>Get Help Now</Text>
+        </View>
+        {gridContent}
       </SafeAreaView>
     </ImageBackground>
   );
@@ -165,5 +224,19 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginTop: 4,
     textAlign: 'center',
+  },
+  gridTablet: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  gridRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  gridItemTablet: {
+    marginHorizontal: 24,
   },
 });

@@ -24,19 +24,33 @@ export default function TabLayout() {
         tabBarInactiveTintColor: '#94A3B8',
         tabBarStyle: {
           position: 'absolute',
-          bottom: Platform.select({ web: 0, default: 20 }),
-          left: Platform.select({ web: 0, default: 20 }),
-          right: Platform.select({ web: 0, default: 20 }),
+          bottom: Platform.select({ web: 0, ios: 20, android: 20 }),
+          left: Platform.select({ web: 0, ios: 20, android: 20 }),
+          right: Platform.select({ web: 0, ios: 20, android: 20 }),
           height: 70,
-          backgroundColor: Platform.select({ web: '#1A202C', default: 'transparent' }),
+          backgroundColor: Platform.select({ web: '#1A202C', ios: 'transparent', android: 'transparent' }),
           borderTopWidth: 0,
           elevation: 0,
-          borderRadius: Platform.select({ web: 0, default: 20 }),
-          overflow: Platform.select({ web: 'hidden', default: 'visible' }),
+          borderRadius: Platform.select({ web: 0, ios: 20, android: 20 }),
+          overflow: Platform.select({ web: 'hidden', ios: 'visible', android: 'visible' }),
         },
         tabBarBackground: Platform.select({
-          web: () => null,
-          default: () => (
+          web: () => <></>,
+          ios: () => (
+            <BlurView
+              tint="dark"
+              intensity={80}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                borderRadius: 20,
+              }}
+            />
+          ),
+          android: () => (
             <BlurView
               tint="dark"
               intensity={80}
@@ -54,10 +68,14 @@ export default function TabLayout() {
         tabBarLabelStyle: {
           fontFamily: 'Inter_600SemiBold',
           fontSize: 12,
-          marginBottom: Platform.select({ web: 8, default: 10 }),
+          marginBottom: 0,
+          textAlign: 'center',
+          alignItems: 'center',
         },
         tabBarIconStyle: {
-          marginTop: Platform.select({ web: 8, default: 10 }),
+          marginTop: 0,
+          alignItems: 'center',
+          justifyContent: 'center',
         },
       }}>
       <Tabs.Screen

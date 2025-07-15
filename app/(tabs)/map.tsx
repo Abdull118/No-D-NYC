@@ -7,13 +7,18 @@ import {
   Linking,
   Dimensions,
   ScrollView,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Navigation } from 'lucide-react-native';
+import { Navigation, X } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ExpoLocation from 'expo-location';
 import MapView, { Marker } from 'react-native-maps';
 import { locations, locationTypes, type LocationInfo } from '@/data/locations';
+import { showLocation } from 'react-native-map-link';
+import * as Network from 'expo-network';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import uuid from 'react-native-uuid';
 
 const DEFAULT_REGION = {
   latitude: 40.7128,
@@ -22,12 +27,62 @@ const DEFAULT_REGION = {
   longitudeDelta: 0.0421,
 };
 
+const MAPBOX_TOKEN = 'pk.eyJ1IjoiYWJkdWxsMTE4IiwiYSI6ImNsNXhyYmNwbjA5bHIzY3J6aGM0N3U2cWkifQ.6iy9G49UGoRv3r6RGR_BiQ';
+
+function getMapboxStaticImageUrl({ locations, zoom = 12, width = 600, height = 400 }: { locations: LocationInfo[]; zoom?: number; width?: number; height?: number }) {
+  // Build marker overlays for each location
+  const markers = locations.map((loc: LocationInfo) => `pin-s+ff4b4b(${loc.coordinates.longitude},${loc.coordinates.latitude})`).join(',');
+  // Center on the first location or NYC if none
+  const center = locations.length > 0
+    ? `${locations[0].coordinates.longitude},${locations[0].coordinates.latitude},${zoom}`
+    : `-74.0060,40.7128,${zoom}`;
+  return `https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/${markers}/${center}/${width}x${height}?access_token=${MAPBOX_TOKEN}`;
+}
+
+const DEVICE_ID_KEY = 'device-unique-id';
+const USER_CLICKS_KEY = 'user-pin-clicks';
+
+async function getDeviceId() {
+  let id = await AsyncStorage.getItem(DEVICE_ID_KEY);
+  if (!id) {
+    id = uuid.v4() as string;
+    await AsyncStorage.setItem(DEVICE_ID_KEY, id);
+  }
+  return id;
+}
+
+async function recordPinClick(pin: LocationInfo, userId: string) {
+  // pin: LocationInfo, userId: string
+  const raw = await AsyncStorage.getItem(USER_CLICKS_KEY);
+  let data = raw ? JSON.parse(raw) : {};
+  if (!data[userId]) data[userId] = {};
+  const pinKey = pin.id;
+  if (!data[userId][pinKey]) {
+    data[userId][pinKey] = {
+      pinInfo: {
+        id: pin.id,
+        name: pin.name,
+        address: pin.address,
+        coordinates: pin.coordinates,
+        type: pin.type,
+      },
+      clickCount: 0,
+      timestamps: [],
+    };
+  }
+  data[userId][pinKey].clickCount += 1;
+  data[userId][pinKey].timestamps.push(Date.now());
+  await AsyncStorage.setItem(USER_CLICKS_KEY, JSON.stringify(data));
+}
+
 export default function MapScreen() {
   const [userLocation, setUserLocation] = useState<ExpoLocation.LocationObject | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [selectedLocation, setSelectedLocation] = useState<LocationInfo | null>(null);
   const [selectedType, setSelectedType] = useState<string | null>(null);
+  const [offline, setOffline] = useState(false);
   const mapRef = useRef<MapView | null>(null);
+  const [deviceId, setDeviceId] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -41,7 +96,20 @@ export default function MapScreen() {
     })();
   }, []);
 
-  const handleLocationSelect = (location: LocationInfo) => {
+  useEffect(() => {
+    const check = async () => {
+      const state = await Network.getNetworkStateAsync();
+      setOffline(!state.isConnected || !state.isInternetReachable);
+    };
+    check();
+    // Optionally, add a listener for network changes
+  }, []);
+
+  useEffect(() => {
+    getDeviceId().then(setDeviceId);
+  }, []);
+
+  const handleLocationSelect = async (location: LocationInfo) => {
     setSelectedLocation(location);
     mapRef.current?.animateToRegion(
       {
@@ -52,11 +120,22 @@ export default function MapScreen() {
       },
       1000
     );
+    if (deviceId) {
+      await recordPinClick(location, deviceId);
+    }
   };
 
   const openDirections = (location: LocationInfo) => {
-    const url = `https://www.google.com/maps/dir/?api=1&destination=${location.coordinates.latitude},${location.coordinates.longitude}`;
-    Linking.openURL(url).catch((err) => console.error('Error opening directions:', err));
+    showLocation({
+      latitude: location.coordinates.latitude,
+      longitude: location.coordinates.longitude,
+      title: location.name,
+      // Optionally, you can add:
+      // directionsMode: 'walk', // or 'car', 'public-transport', 'bike'
+      // dialogTitle: 'Open in Maps',
+      // dialogMessage: 'Choose an app to get directions',
+      // cancelText: 'Cancel',
+    });
   };
 
   const filteredLocations = selectedType
@@ -67,6 +146,25 @@ export default function MapScreen() {
     return (
       <SafeAreaView style={styles.container}>
         <Text style={styles.errorText}>{errorMsg}</Text>
+      </SafeAreaView>
+    );
+  }
+
+  if (offline) {
+    // Show static map image with pins
+    const staticUrl = getMapboxStaticImageUrl({ locations: filteredLocations, zoom: 12, width: 600, height: 400 });
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <Image
+            source={{ uri: staticUrl }}
+            style={{ width: 300, height: 200, borderRadius: 16 }}
+            resizeMode="cover"
+          />
+          <Text style={{ color: '#fff', marginTop: 16, textAlign: 'center' }}>
+            Offline: Showing static map. Connect to the internet for interactive map features.
+          </Text>
+        </View>
       </SafeAreaView>
     );
   }
@@ -150,6 +248,13 @@ export default function MapScreen() {
                     {locationTypes[selectedLocation.type].name}
                   </Text>
                 </View>
+                <TouchableOpacity
+                  onPress={() => setSelectedLocation(null)}
+                  accessibilityLabel="Close card"
+                  style={styles.closeButton}
+                >
+                  <X color="#A0AEC0" size={22} />
+                </TouchableOpacity>
               </View>
               <Text style={styles.locationAddress}>
                 {selectedLocation.address}
@@ -302,5 +407,12 @@ const styles = StyleSheet.create({
     color: 'white',
     marginLeft: 8,
     fontSize: 16,
+  },
+  closeButton: {
+    marginLeft: 12,
+    padding: 4,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

@@ -1,4 +1,4 @@
-import { MapPin, Chrome as Home, Pill, Heart, Coffee, Scale, Bus, Wifi, ShowerHead as Shower, Phone } from 'lucide-react-native';
+import { MapPin, Chrome as Home, Pill, Heart, Coffee, Scale, Bus, Wifi, ShowerHead as Shower, Phone, FlaskConical } from 'lucide-react-native';
 
 export type LocationType = 
   | 'shelter'
@@ -10,7 +10,8 @@ export type LocationType =
   | 'wifi'
   | 'hygiene'
   | 'emergency'
-  | 'community';
+  | 'community'
+  | 'drugTesting';
 
 export interface LocationInfo {
   id: string;
@@ -76,6 +77,11 @@ export const locationTypes = {
     name: 'Community Centers',
     color: '#F97316',
     icon: MapPin,
+  },
+  drugTesting: {
+    name: 'Drug Testing Centers',
+    color: '#6366F1',
+    icon: FlaskConical,
   },
 };
 
@@ -349,5 +355,167 @@ export const locations: LocationInfo[] = [
     services: ['Free Laundry', 'Soap & Detergent Provided', 'Community Support Services'],
     hours: 'Wed 5PM-8PM',
     phone: '(212) 675-6150',
+  },
+  // --- Drug Testing Centers (10 locations, 2 per borough) ---
+  {
+    id: 'dtc-1',
+    name: 'OnPoint NYC - Harlem',
+    address: '104-106 East 126th St, New York, NY 10035',
+    coordinates: { latitude: 40.8069, longitude: -73.9361 },
+    type: 'drugTesting',
+    services: ['Drug Checking', 'Harm Reduction', 'Counseling'],
+    hours: 'Mon-Fri 9AM-5PM',
+    phone: '(212) 828-8464',
+  },
+  {
+    id: 'dtc-2',
+    name: 'OnPoint NYC - Washington Heights',
+    address: '500 W 180th St, New York, NY 10033',
+    coordinates: { latitude: 40.8492, longitude: -73.9346 },
+    type: 'drugTesting',
+    services: ['Drug Checking', 'Harm Reduction', 'Support Services'],
+    hours: 'Mon-Fri 9AM-5PM',
+    phone: '(212) 923-7600',
+  },
+  {
+    id: 'dtc-3',
+    name: 'SACHR - Lower East Side',
+    address: '25 Allen St, New York, NY 10002',
+    coordinates: { latitude: 40.7155, longitude: -73.9935 },
+    type: 'drugTesting',
+    services: ['Drug Checking', 'Harm Reduction', 'HIV Testing'],
+    hours: 'Mon-Fri 9AM-5PM',
+    phone: '(212) 226-6333',
+  },
+  {
+    id: 'dtc-4',
+    name: 'Brooklyn Community Recovery Center',
+    address: '20 New York Ave, Brooklyn, NY 11216',
+    coordinates: { latitude: 40.6772, longitude: -73.9507 },
+    type: 'drugTesting',
+    services: ['Drug Checking', 'Peer Support', 'Referrals'],
+    hours: 'Mon-Fri 10AM-6PM',
+    phone: '(718) 388-7690',
+  },
+  {
+    id: 'dtc-5',
+    name: 'VOCAL-NY Brooklyn',
+    address: '80A 4th Ave, Brooklyn, NY 11217',
+    coordinates: { latitude: 40.6816, longitude: -73.9802 },
+    type: 'drugTesting',
+    services: ['Drug Checking', 'Harm Reduction', 'Advocacy'],
+    hours: 'Mon-Fri 9AM-5PM',
+    phone: '(718) 802-9540',
+  },
+  {
+    id: 'dtc-6',
+    name: 'Bronx Harm Reduction',
+    address: '226 E 144th St, Bronx, NY 10451',
+    coordinates: { latitude: 40.8141, longitude: -73.9226 },
+    type: 'drugTesting',
+    services: ['Drug Checking', 'Harm Reduction', 'Case Management'],
+    hours: 'Mon-Fri 9AM-5PM',
+    phone: '(718) 993-3100',
+  },
+  {
+    id: 'dtc-7',
+    name: 'St. Ann’s Corner of Harm Reduction',
+    address: '886 Westchester Ave, Bronx, NY 10459',
+    coordinates: { latitude: 40.8197, longitude: -73.9046 },
+    type: 'drugTesting',
+    services: ['Drug Checking', 'Harm Reduction', 'HIV Testing'],
+    hours: 'Mon-Fri 9AM-5PM',
+    phone: '(718) 585-5544',
+  },
+  {
+    id: 'dtc-8',
+    name: 'STATEN ISLAND PARTNERSHIP FOR COMMUNITY WELLNESS',
+    address: '444 St. Marks Pl, Staten Island, NY 10301',
+    coordinates: { latitude: 40.6382, longitude: -74.0776 },
+    type: 'drugTesting',
+    services: ['Drug Checking', 'Harm Reduction', 'Support Services'],
+    hours: 'Mon-Fri 9AM-5PM',
+    phone: '(718) 226-0253',
+  },
+  {
+    id: 'dtc-9',
+    name: 'Project Hospitality',
+    address: '100 Park Ave, Staten Island, NY 10302',
+    coordinates: { latitude: 40.6372, longitude: -74.1377 },
+    type: 'drugTesting',
+    services: ['Drug Checking', 'Harm Reduction', 'Referrals'],
+    hours: 'Mon-Fri 9AM-5PM',
+    phone: '(718) 448-1544',
+  },
+  {
+    id: 'dtc-10',
+    name: 'Queens Harm Reduction Center',
+    address: '92-10 Roosevelt Ave, Queens, NY 11372',
+    coordinates: { latitude: 40.7498, longitude: -73.8801 },
+    type: 'drugTesting',
+    services: ['Drug Checking', 'Harm Reduction', 'Support Services'],
+    hours: 'Mon-Fri 9AM-5PM',
+    phone: '(718) 803-6644',
+  },
+  {
+    id: 'dtc-11',
+    name: 'Elmcor Youth & Adult Activities',
+    address: '107-20 Northern Blvd, Queens, NY 11368',
+    coordinates: { latitude: 40.7571, longitude: -73.8626 },
+    type: 'drugTesting',
+    services: ['Drug Checking', 'Harm Reduction', 'Counseling'],
+    hours: 'Mon-Fri 9AM-5PM',
+    phone: '(718) 651-0096',
+  },
+  // --- Naloxone Pharmacies (from NYC PDF, 1+ per borough) ---
+  {
+    id: 'naloxone-bronx-1',
+    name: 'CVS Pharmacy',
+    address: '282 East 149th St., Bronx, NY 10451',
+    coordinates: { latitude: 40.8171, longitude: -73.9225 },
+    type: 'drugTesting',
+    services: ['Free Naloxone (Narcan) Kits'],
+    hours: 'Mon-Fri 9am-7pm, Sat 9am-6pm, Sun 10am-5pm',
+    phone: '718-665-5600',
+  },
+  {
+    id: 'naloxone-brooklyn-1',
+    name: 'Rite Aid',
+    address: '320 Smith Street, Brooklyn, NY 11231',
+    coordinates: { latitude: 40.6827, longitude: -73.9956 },
+    type: 'drugTesting',
+    services: ['Free Naloxone (Narcan) Kits'],
+    hours: 'Mon-Fri 8am-9pm, Sat 9am-6pm, Sun 9am-5pm',
+    phone: '718-403-9371',
+  },
+  {
+    id: 'naloxone-manhattan-1',
+    name: 'CVS Pharmacy',
+    address: '115 W. 125th St., Manhattan, NY 10027',
+    coordinates: { latitude: 40.8083, longitude: -73.9501 },
+    type: 'drugTesting',
+    services: ['Free Naloxone (Narcan) Kits'],
+    hours: 'Mon-Fri 8am-9pm, Sat & Sun 9am-6pm',
+    phone: '212-864-5431',
+  },
+  {
+    id: 'naloxone-queens-1',
+    name: 'Walgreens',
+    address: '10640 Rockaway Beach Blvd., Queens, NY 11694',
+    coordinates: { latitude: 40.5832, longitude: -73.8276 },
+    type: 'drugTesting',
+    services: ['Free Naloxone (Narcan) Kits'],
+    hours: 'Mon-Fri 9am-9pm, Sat 9am-6pm, Sun 10am-6pm',
+    phone: '718-318-8512',
+  },
+  {
+    id: 'naloxone-statenisland-1',
+    name: 'CVS Pharmacy',
+    address: '1361 Hylan Blvd., Staten Island, NY 10305',
+    coordinates: { latitude: 40.5932, longitude: -74.0755 },
+    type: 'drugTesting',
+    services: ['Free Naloxone (Narcan) Kits'],
+    hours: 'OPEN 24/7',
+    phone: '718-979-2828',
   },
 ];
