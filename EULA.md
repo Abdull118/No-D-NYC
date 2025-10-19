@@ -1,0 +1,164 @@
+# End User License Agreement (EULA)
+## No-D NYC Mobile Application
+
+**Effective Date:** [Date]
+
+**Last Updated:** [Date]
+
+---
+
+## 1. ACCEPTANCE OF TERMS
+
+By downloading, installing, or using the No-D NYC mobile application ("App"), you agree to be bound by this End User License Agreement ("EULA"). If you do not agree to these terms, do not use the App.
+
+---
+
+## 2. APP DESCRIPTION AND PURPOSE
+
+No-D NYC is a **reference and information application** designed to help users locate and access various social services, emergency contacts, and community resources in New York City. The App serves as a digital directory and mapping tool.
+
+### 2.1 Core Functionality
+- **Emergency Contact Directory**: Provides quick access to emergency phone numbers (911, 988, crisis lines)
+- **Service Location Mapping**: Displays locations of shelters, treatment centers, food services, and other community resources
+- **Resource Information**: Links to external websites with additional information about services
+- **Navigation Assistance**: Provides directions to service locations through third-party mapping applications
+
+### 2.2 What This App Does NOT Do
+- **Does NOT dispatch emergency services**
+- **Does NOT send location data to emergency responders**
+- **Does NOT provide real-time emergency response**
+- **Does NOT replace direct emergency service contact**
+
+---
+
+## 3. LOCATION SERVICES DISCLAIMER
+
+### 3.1 Location Data Usage
+The App requests location permissions to:
+- Display your current position on the interactive map
+- Center the map view on your approximate location
+- Show nearby service locations relative to your position
+
+### 3.2 Location Data Limitations
+- **No Emergency Dispatch**: Your location data is NOT transmitted to emergency services
+- **Local Use Only**: Location data is used solely within the App for mapping purposes
+- **No Third-Party Sharing**: Location data is not shared with external services or emergency responders
+- **No Real-Time Tracking**: The App does not continuously track or monitor your location
+
+### 3.3 Emergency Services Clarification
+**IMPORTANT**: This App does not provide emergency dispatch services. When you use the emergency contact buttons:
+- The App initiates a standard phone call to the selected number
+- You must speak directly with emergency services personnel
+- You must provide your location and emergency details verbally
+- Emergency services will NOT automatically receive your location from this App
+
+---
+
+## 4. PRIVACY AND DATA COLLECTION
+
+### 4.1 Data Collection
+The App may collect:
+- Device location data (for mapping purposes only)
+- Device identification for app functionality
+
+### 4.2 Data Usage
+- Location data is used exclusively for map display and navigation
+- No personal information is transmitted to emergency services
+- No location data is shared with third parties for emergency response
+
+### 4.3 Data Storage
+- Location data is processed locally on your device
+- No location history is stored on external servers
+- Usage data is anonymized and aggregated for app improvement
+
+---
+
+## 5. EMERGENCY SERVICES DISCLAIMER
+
+### 5.1 No Emergency Dispatch Capability
+**CRITICAL DISCLAIMER**: This App does not have the capability to:
+- Automatically dispatch emergency services
+- Send location data to emergency responders
+- Provide real-time emergency response
+- Replace direct emergency service contact
+
+### 5.2 Emergency Contact Functionality
+When using emergency contact features:
+- The App functions as a "speed dialer" for emergency numbers
+- You must manually initiate calls and provide information verbally
+- Emergency services receive information only through your direct communication
+- Response times depend on standard emergency service protocols
+
+### 5.3 User Responsibility
+Users are responsible for:
+- Providing accurate location information when calling emergency services
+- Clearly communicating their emergency situation
+- Following emergency service operator instructions
+- Understanding that this App does not guarantee emergency response
+
+---
+
+## 6. SERVICE AVAILABILITY AND ACCURACY
+
+### 6.1 Service Information
+- Service locations and contact information are provided for reference only
+- Information may not be current or accurate
+- Users should verify service availability before visiting locations
+- Service hours and availability may change without notice
+
+### 6.2 No Guarantee of Services
+- The App does not guarantee service availability
+- Service providers are independent entities
+- The App is not responsible for service quality or availability
+- Users access services at their own risk
+
+---
+
+## 7. LIMITATION OF LIABILITY
+
+### 7.1 Emergency Situations
+**IMPORTANT**: In emergency situations:
+- This App is not a substitute for direct emergency service contact
+- The App does not guarantee emergency response
+- Users should call 911 directly for life-threatening emergencies
+- The App is not liable for emergency response delays or failures
+
+### 7.2 General Limitations
+The App is provided "as is" without warranties. The developers are not liable for:
+- Emergency response failures or delays
+- Inaccurate service information
+- Service unavailability
+- Any damages resulting from App use
+
+---
+
+## 8. USER ACKNOWLEDGMENTS
+
+By using this App, you acknowledge that:
+- You understand this App does not dispatch emergency services
+- You understand emergency services will not receive your location automatically
+- You will provide location information verbally when calling emergency services
+- You understand the App's limitations in emergency situations
+- You will use the App responsibly and in accordance with these terms
+
+---
+
+## 9. CONTACT INFORMATION
+
+For questions about this EULA or the App:
+- Email: [Your Contact Email]
+- Website: [Your Website]
+
+---
+
+## 10. MODIFICATIONS
+
+This EULA may be updated periodically. Continued use of the App constitutes acceptance of any modifications.
+
+---
+
+**By using No-D NYC, you confirm that you have read, understood, and agree to be bound by this End User License Agreement.**
+
+---
+
+*This EULA specifically addresses Apple's App Store Review Guidelines 5.1.5 regarding location-based APIs and emergency services functionality.*

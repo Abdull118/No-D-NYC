@@ -50,11 +50,11 @@
       <true/>
     </dict>
     <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-    <string>Allow NoD NYC to use your location.</string>
+    <string>NoD NYC uses your location to show your current position on the map and help you find nearby shelters, treatment centers, food services, and other essential resources. For example, we'll show you the closest emergency shelter or harm reduction center to your current location.</string>
     <key>NSLocationAlwaysUsageDescription</key>
-    <string>Allow $(PRODUCT_NAME) to access your location</string>
+    <string>NoD NYC uses your location to show your current position on the map and help you find nearby shelters, treatment centers, food services, and other essential resources. For example, we'll show you the closest emergency shelter or harm reduction center to your current location.</string>
     <key>NSLocationWhenInUseUsageDescription</key>
-    <string>Allow $(PRODUCT_NAME) to access your location</string>
+    <string>NoD NYC uses your location to show your current position on the map and help you find nearby shelters, treatment centers, food services, and other essential resources. For example, we'll show you the closest emergency shelter or harm reduction center to your current location.</string>
     <key>NSUserActivityTypes</key>
     <array>
       <string>$(PRODUCT_BUNDLE_IDENTIFIER).expo.index_route</string>

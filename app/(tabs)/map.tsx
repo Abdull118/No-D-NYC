@@ -1,22 +1,19 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
-  Linking,
-  Dimensions,
   ScrollView,
-  Image,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Navigation, X } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ExpoLocation from 'expo-location';
-import MapView, { Marker } from 'react-native-maps';
+import MapView, { Marker, PROVIDER_GOOGLE, UrlTile } from 'react-native-maps';
 import { locations, locationTypes, type LocationInfo } from '@/data/locations';
 import { showLocation } from 'react-native-map-link';
-import * as Network from 'expo-network';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import uuid from 'react-native-uuid';
 
@@ -27,17 +24,31 @@ const DEFAULT_REGION = {
   longitudeDelta: 0.0421,
 };
 
-const MAPBOX_TOKEN = 'pk.eyJ1IjoiYWJkdWxsMTE4IiwiYSI6ImNsNXhyYmNwbjA5bHIzY3J6aGM0N3U2cWkifQ.6iy9G49UGoRv3r6RGR_BiQ';
-
-function getMapboxStaticImageUrl({ locations, zoom = 12, width = 600, height = 400 }: { locations: LocationInfo[]; zoom?: number; width?: number; height?: number }) {
-  // Build marker overlays for each location
-  const markers = locations.map((loc: LocationInfo) => `pin-s+ff4b4b(${loc.coordinates.longitude},${loc.coordinates.latitude})`).join(',');
-  // Center on the first location or NYC if none
-  const center = locations.length > 0
-    ? `${locations[0].coordinates.longitude},${locations[0].coordinates.latitude},${zoom}`
-    : `-74.0060,40.7128,${zoom}`;
-  return `https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/${markers}/${center}/${width}x${height}?access_token=${MAPBOX_TOKEN}`;
-}
+// Function to calculate region that includes all locations
+const calculateBoundsRegion = (locations: LocationInfo[]) => {
+  if (locations.length === 0) return DEFAULT_REGION;
+  
+  const latitudes = locations.map(loc => loc.coordinates.latitude);
+  const longitudes = locations.map(loc => loc.coordinates.longitude);
+  
+  const minLat = Math.min(...latitudes);
+  const maxLat = Math.max(...latitudes);
+  const minLng = Math.min(...longitudes);
+  const maxLng = Math.max(...longitudes);
+  
+  const centerLat = (minLat + maxLat) / 2;
+  const centerLng = (minLng + maxLng) / 2;
+  
+  const latDelta = Math.abs(maxLat - minLat) * 1.2; // Add 20% padding
+  const lngDelta = Math.abs(maxLng - minLng) * 1.2; // Add 20% padding
+  
+  return {
+    latitude: centerLat,
+    longitude: centerLng,
+    latitudeDelta: Math.max(latDelta, 0.01), // Minimum zoom level
+    longitudeDelta: Math.max(lngDelta, 0.01), // Minimum zoom level
+  };
+};
 
 const DEVICE_ID_KEY = 'device-unique-id';
 const USER_CLICKS_KEY = 'user-pin-clicks';
@@ -80,33 +91,126 @@ export default function MapScreen() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [selectedLocation, setSelectedLocation] = useState<LocationInfo | null>(null);
   const [selectedType, setSelectedType] = useState<string | null>(null);
-  const [offline, setOffline] = useState(false);
+  const [initialRegion, setInitialRegion] = useState(() => calculateBoundsRegion(locations));
   const mapRef = useRef<MapView | null>(null);
   const [deviceId, setDeviceId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [mapReady, setMapReady] = useState(false);
+  const [hasLocationPermission, setHasLocationPermission] = useState(false);
+  const [useFallbackTiles, setUseFallbackTiles] = useState(false);
+
+  const filteredLocations = selectedType
+    ? locations.filter(location => location.type === selectedType)
+    : locations;
 
   useEffect(() => {
+    let mounted = true;
+    let locationTimeout: ReturnType<typeof setTimeout> | null = null;
+
     (async () => {
-      const { status } = await ExpoLocation.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        setErrorMsg('Permission to access location was denied');
-        return;
+      try {
+        const { status } = await ExpoLocation.requestForegroundPermissionsAsync();
+        if (!mounted) return;
+        
+        if (status !== 'granted') {
+          setErrorMsg('Location permission denied - showing default NYC area');
+          setIsLoading(false);
+          setHasLocationPermission(false);
+          return;
+        }
+        
+        setHasLocationPermission(true);
+        // Show the map while we continue to resolve the user's position
+        setIsLoading(false);
+        locationTimeout = setTimeout(() => {
+          if (mounted) {
+            setErrorMsg(prev => prev ?? 'Using NYC area while we determine your location');
+          }
+        }, 8000);
+        
+        try {
+          const location = await ExpoLocation.getCurrentPositionAsync({
+            accuracy: ExpoLocation.Accuracy.Balanced,
+            mayShowUserSettingsDialog: true,
+          });
+          if (mounted) {
+            setUserLocation(location);
+            // Keep initial region showing all pins - don't change region on user location
+          }
+          if (locationTimeout) {
+            clearTimeout(locationTimeout);
+            locationTimeout = null;
+          }
+        } catch (locationError) {
+          console.warn('Could not get user location:', locationError);
+          if (mounted) {
+            setErrorMsg('Could not get location - showing default NYC area');
+          }
+          if (locationTimeout) {
+            clearTimeout(locationTimeout);
+          }
+        }
+      } catch (error) {
+        console.error('Location permission error:', error);
+        if (mounted) {
+          setErrorMsg('Location error - showing default NYC area');
+        }
+      } finally {
+        if (mounted) {
+          setIsLoading(false);
+        }
+        if (locationTimeout) {
+          clearTimeout(locationTimeout);
+          locationTimeout = null;
+        }
       }
-      const location = await ExpoLocation.getCurrentPositionAsync({});
-      setUserLocation(location);
     })();
-  }, []);
-
-  useEffect(() => {
-    const check = async () => {
-      const state = await Network.getNetworkStateAsync();
-      setOffline(!state.isConnected || !state.isInternetReachable);
+    
+    return () => {
+      mounted = false;
+      if (locationTimeout) {
+        clearTimeout(locationTimeout);
+      }
     };
-    check();
-    // Optionally, add a listener for network changes
   }, []);
 
   useEffect(() => {
-    getDeviceId().then(setDeviceId);
+    getDeviceId().then(setDeviceId).catch((error) => {
+      console.warn('Error getting device ID:', error);
+    });
+  }, []);
+
+  // Removed automatic animation to user location to keep focus on all pins on page load
+  useEffect(() => {
+    if (mapReady && userLocation) {
+      mapRef.current?.animateToRegion(
+        {
+          latitude: userLocation.coords.latitude,
+          longitude: userLocation.coords.longitude,
+          latitudeDelta: 0.05,
+          longitudeDelta: 0.05,
+        },
+        600
+      );
+    }
+  }, [mapReady, userLocation]);
+
+  const handleMapReady = useCallback(() => {
+    setMapReady(true);
+  }, []);
+
+  const handleMapError = useCallback((event: { nativeEvent?: { errorMessage?: string } }) => {
+    const message = event?.nativeEvent?.errorMessage;
+    console.warn('Map error:', message);
+    setErrorMsg(() => {
+      if (Platform.OS === 'android') {
+        return 'Google basemap could not load. Showing OpenStreetMap tiles as a fallback.';
+      }
+      return message ?? 'Unable to load the map tiles.';
+    });
+    if (Platform.OS === 'android') {
+      setUseFallbackTiles(true);
+    }
   }, []);
 
   const handleLocationSelect = async (location: LocationInfo) => {
@@ -138,36 +242,26 @@ export default function MapScreen() {
     });
   };
 
-  const filteredLocations = selectedType
-    ? locations.filter(location => location.type === selectedType)
-    : locations;
+  // Safety gate for showsUserLocation: only enable on iOS due to GMS version conflicts on Android
+  // On Android, we'll show a manual marker instead to avoid IncompatibleClassChangeError
+  const canShowUserLocation = Platform.select({
+    ios: hasLocationPermission && mapReady,
+    android: false, // Disabled on Android - using manual marker instead
+    default: false,
+  });
 
-  if (errorMsg) {
+  if (isLoading) {
     return (
       <SafeAreaView style={styles.container}>
-        <Text style={styles.errorText}>{errorMsg}</Text>
-      </SafeAreaView>
-    );
-  }
-
-  if (offline) {
-    // Show static map image with pins
-    const staticUrl = getMapboxStaticImageUrl({ locations: filteredLocations, zoom: 12, width: 600, height: 400 });
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <Image
-            source={{ uri: staticUrl }}
-            style={{ width: 300, height: 200, borderRadius: 16 }}
-            resizeMode="cover"
-          />
-          <Text style={{ color: '#fff', marginTop: 16, textAlign: 'center' }}>
-            Offline: Showing static map. Connect to the internet for interactive map features.
-          </Text>
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>Loading map...</Text>
         </View>
       </SafeAreaView>
     );
   }
+
+  // Don't block the map if location permission is denied
+  // Just show the map with default NYC location
 
   return (
     <SafeAreaView style={styles.container}>
@@ -209,19 +303,43 @@ export default function MapScreen() {
       </ScrollView>
 
       <View style={styles.mapContainer}>
+        {errorMsg && (
+          <View style={styles.errorBanner}>
+            <Text style={styles.errorBannerText}>{errorMsg}</Text>
+          </View>
+        )}
         <MapView
           ref={mapRef}
+          provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
           style={styles.map}
-          initialRegion={userLocation ? {
-            latitude: userLocation.coords.latitude,
-            longitude: userLocation.coords.longitude,
-            latitudeDelta: 0.0922,
-            longitudeDelta: 0.0421,
-          } : DEFAULT_REGION}
-          showsUserLocation
-          showsMyLocationButton>
-          {filteredLocations.map((location) => {
-            const type = locationTypes[location.type];
+          initialRegion={initialRegion}
+          showsUserLocation={!!canShowUserLocation}
+          showsMyLocationButton={false}
+          onMapReady={handleMapReady}
+          onMapLoaded={handleMapReady}>
+          {Platform.OS === 'android' && useFallbackTiles && (
+            <UrlTile
+              key="fallback-tiles"
+              urlTemplate="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+              maximumZ={19}
+              tileSize={256}
+              shouldReplaceMapContent
+            />
+          )}
+          {/* Manual "You are here" marker on Android to avoid GMS conflicts */}
+          {Platform.OS === 'android' && mapReady && userLocation && (
+            <Marker
+              coordinate={{
+                latitude: userLocation.coords.latitude,
+                longitude: userLocation.coords.longitude,
+              }}
+              title="You are here"
+              pinColor="#4285F4"
+            />
+          )}
+          {mapReady && filteredLocations.map((location) => {
+            const type = locationTypes[location.type as keyof typeof locationTypes];
+            if (!type) return null;
             const Icon = type.icon;
             return (
               <Marker
@@ -245,7 +363,7 @@ export default function MapScreen() {
                 <View style={styles.cardTitleContainer}>
                   <Text style={styles.locationName}>{selectedLocation.name}</Text>
                   <Text style={styles.locationType}>
-                    {locationTypes[selectedLocation.type].name}
+                    {locationTypes[selectedLocation.type as keyof typeof locationTypes]?.name || 'Unknown'}
                   </Text>
                 </View>
                 <TouchableOpacity
@@ -332,8 +450,7 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   map: {
-    width: Dimensions.get('window').width,
-    height: '100%',
+    flex: 1,
   },
   marker: {
     padding: 8,
@@ -347,6 +464,41 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'center',
     marginTop: 50,
+    paddingHorizontal: 20,
+  },
+  errorSubtext: {
+    fontFamily: 'Inter_400Regular',
+    color: '#A0AEC0',
+    fontSize: 14,
+    textAlign: 'center',
+    marginTop: 10,
+    paddingHorizontal: 20,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontFamily: 'Inter_400Regular',
+    color: '#E2E8F0',
+    fontSize: 16,
+  },
+  errorBanner: {
+    position: 'absolute',
+    top: 10,
+    left: 20,
+    right: 20,
+    backgroundColor: 'rgba(255, 75, 75, 0.9)',
+    padding: 12,
+    borderRadius: 8,
+    zIndex: 1000,
+  },
+  errorBannerText: {
+    fontFamily: 'Inter_400Regular',
+    color: 'white',
+    fontSize: 12,
+    textAlign: 'center',
   },
   locationCard: {
     position: 'absolute',

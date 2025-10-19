@@ -68,11 +68,6 @@ export const locationTypes = {
     color: '#14B8A6',
     icon: Shower,
   },
-  emergency: {
-    name: 'Emergency Services',
-    color: '#DC2626',
-    icon: Phone,
-  },
   community: {
     name: 'Community Centers',
     color: '#F97316',
