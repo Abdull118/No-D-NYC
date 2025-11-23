@@ -16,6 +16,9 @@ import { locations, locationTypes, type LocationInfo } from '@/data/locations';
 import { showLocation } from 'react-native-map-link';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import uuid from 'react-native-uuid';
+import { TRANSLATIONS, type Language } from '@/data/translations';
+
+const LANGUAGE_KEY = 'app-language';
 
 const DEFAULT_REGION = {
   latitude: 40.7128,
@@ -98,6 +101,30 @@ export default function MapScreen() {
   const [mapReady, setMapReady] = useState(false);
   const [hasLocationPermission, setHasLocationPermission] = useState(false);
   const [useFallbackTiles, setUseFallbackTiles] = useState(false);
+  const [language, setLanguage] = useState<Language>('En');
+
+  // Load language from storage
+  useEffect(() => {
+    AsyncStorage.getItem(LANGUAGE_KEY).then((stored) => {
+      if (stored === 'En' || stored === 'Es') {
+        setLanguage(stored);
+      }
+    });
+  }, []);
+
+  // Subscribe to language changes
+  useEffect(() => {
+    const interval = setInterval(() => {
+      AsyncStorage.getItem(LANGUAGE_KEY).then((stored) => {
+        if (stored === 'En' || stored === 'Es') {
+          setLanguage(stored);
+        }
+      });
+    }, 500);
+    return () => clearInterval(interval);
+  }, []);
+
+  const t = TRANSLATIONS[language];
 
   const filteredLocations = selectedType
     ? locations.filter(location => location.type === selectedType)
@@ -112,8 +139,9 @@ export default function MapScreen() {
         const { status } = await ExpoLocation.requestForegroundPermissionsAsync();
         if (!mounted) return;
         
+        const currentT = TRANSLATIONS[language];
         if (status !== 'granted') {
-          setErrorMsg('Location permission denied - showing default NYC area');
+          setErrorMsg(currentT.map.errorMessages.permissionDenied);
           setIsLoading(false);
           setHasLocationPermission(false);
           return;
@@ -122,9 +150,12 @@ export default function MapScreen() {
         setHasLocationPermission(true);
         // Show the map while we continue to resolve the user's position
         setIsLoading(false);
-        locationTimeout = setTimeout(() => {
+        locationTimeout = setTimeout(async () => {
           if (mounted) {
-            setErrorMsg(prev => prev ?? 'Using NYC area while we determine your location');
+            const storedLang = await AsyncStorage.getItem(LANGUAGE_KEY);
+            const currentLang: Language = (storedLang === 'En' || storedLang === 'Es') ? storedLang : 'En';
+            const currentT2 = TRANSLATIONS[currentLang];
+            setErrorMsg(prev => prev ?? currentT2.map.errorMessages.usingNYC);
           }
         }, 8000);
         
@@ -144,7 +175,8 @@ export default function MapScreen() {
         } catch (locationError) {
           console.warn('Could not get user location:', locationError);
           if (mounted) {
-            setErrorMsg('Could not get location - showing default NYC area');
+            const currentT3 = TRANSLATIONS[language];
+            setErrorMsg(currentT3.map.errorMessages.couldNotGetLocation);
           }
           if (locationTimeout) {
             clearTimeout(locationTimeout);
@@ -153,7 +185,8 @@ export default function MapScreen() {
       } catch (error) {
         console.error('Location permission error:', error);
         if (mounted) {
-          setErrorMsg('Location error - showing default NYC area');
+          const currentT4 = TRANSLATIONS[language];
+          setErrorMsg(currentT4.map.errorMessages.locationError);
         }
       } finally {
         if (mounted) {
@@ -172,7 +205,7 @@ export default function MapScreen() {
         clearTimeout(locationTimeout);
       }
     };
-  }, []);
+  }, [language]);
 
   useEffect(() => {
     getDeviceId().then(setDeviceId).catch((error) => {
@@ -202,16 +235,17 @@ export default function MapScreen() {
   const handleMapError = useCallback((event: { nativeEvent?: { errorMessage?: string } }) => {
     const message = event?.nativeEvent?.errorMessage;
     console.warn('Map error:', message);
+    const currentT = TRANSLATIONS[language];
     setErrorMsg(() => {
       if (Platform.OS === 'android') {
-        return 'Google basemap could not load. Showing OpenStreetMap tiles as a fallback.';
+        return currentT.map.errorMessages.androidFallback;
       }
-      return message ?? 'Unable to load the map tiles.';
+      return message ?? currentT.map.errorMessages.mapError;
     });
     if (Platform.OS === 'android') {
       setUseFallbackTiles(true);
     }
-  }, []);
+  }, [language]);
 
   const handleLocationSelect = async (location: LocationInfo) => {
     setSelectedLocation(location);
@@ -254,7 +288,7 @@ export default function MapScreen() {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading map...</Text>
+          <Text style={styles.loadingText}>{t.map.loading}</Text>
         </View>
       </SafeAreaView>
     );
@@ -266,9 +300,9 @@ export default function MapScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Find Help Nearby</Text>
+        <Text style={styles.headerTitle}>{t.map.headerTitle}</Text>
         <Text style={styles.headerSubtitle}>
-          Locate services in NYC
+          {t.map.headerSubtitle}
         </Text>
       </View>
 
@@ -280,10 +314,11 @@ export default function MapScreen() {
         <TouchableOpacity
           style={[styles.legendItem, !selectedType && styles.legendItemSelected]}
           onPress={() => setSelectedType(null)}>
-          <Text style={styles.legendText}>All</Text>
+          <Text style={styles.legendText}>{t.map.all}</Text>
         </TouchableOpacity>
         {Object.entries(locationTypes).map(([key, value]) => {
           const Icon = value.icon;
+          const translatedName = t.locationTypes[key as keyof typeof t.locationTypes] || value.name;
           return (
             <TouchableOpacity
               key={key}
@@ -295,7 +330,7 @@ export default function MapScreen() {
               onPress={() => setSelectedType(key === selectedType ? null : key)}>
               <Icon size={20} color={value.color} />
               <Text style={[styles.legendText, { color: value.color }]}>
-                {value.name}
+                {translatedName}
               </Text>
             </TouchableOpacity>
           );
@@ -333,7 +368,7 @@ export default function MapScreen() {
                 latitude: userLocation.coords.latitude,
                 longitude: userLocation.coords.longitude,
               }}
-              title="You are here"
+              title={t.map.youAreHere}
               pinColor="#4285F4"
             />
           )}
@@ -363,12 +398,12 @@ export default function MapScreen() {
                 <View style={styles.cardTitleContainer}>
                   <Text style={styles.locationName}>{selectedLocation.name}</Text>
                   <Text style={styles.locationType}>
-                    {locationTypes[selectedLocation.type as keyof typeof locationTypes]?.name || 'Unknown'}
+                    {t.locationTypes[selectedLocation.type as keyof typeof t.locationTypes] || locationTypes[selectedLocation.type as keyof typeof locationTypes]?.name || t.map.unknown}
                   </Text>
                 </View>
                 <TouchableOpacity
                   onPress={() => setSelectedLocation(null)}
-                  accessibilityLabel="Close card"
+                  accessibilityLabel={t.map.closeCard}
                   style={styles.closeButton}
                 >
                   <X color="#A0AEC0" size={22} />
@@ -379,18 +414,21 @@ export default function MapScreen() {
               </Text>
               {selectedLocation.services && (
                 <View style={styles.servicesList}>
-                  {selectedLocation.services.map((service, index) => (
-                    <Text key={index} style={styles.serviceItem}>
-                      • {service}
-                    </Text>
-                  ))}
+                  {selectedLocation.services.map((service, index) => {
+                    const translatedService = t.services[service as keyof typeof t.services] || service;
+                    return (
+                      <Text key={index} style={styles.serviceItem}>
+                        • {translatedService}
+                      </Text>
+                    );
+                  })}
                 </View>
               )}
               <TouchableOpacity
                 style={styles.directionsButton}
                 onPress={() => openDirections(selectedLocation)}>
                 <Navigation color="white" size={20} />
-                <Text style={styles.directionsText}>Get Directions</Text>
+                <Text style={styles.directionsText}>{t.map.getDirections}</Text>
               </TouchableOpacity>
             </LinearGradient>
           </View>

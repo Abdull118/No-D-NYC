@@ -3,63 +3,118 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ExternalLink, CircleAlert as AlertCircle } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
+import { useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { TRANSLATIONS, type Language } from '@/data/translations';
 
-const RESOURCES = [
+const LANGUAGE_KEY = 'app-language';
+
+const RESOURCES_CONFIG = [
   {
     id: 'snap',
-    title: 'SNAP Benefits',
-    description: 'Apply for food assistance in NYC',
     url: 'https://www.ny.gov/services/apply-snap',
     gradient: ['#3B82F6', '#1D4ED8'] as [string, string],
   },
   {
     id: 'id',
-    title: 'Replace Lost ID',
-    description: 'Information on getting a new ID in NYC',
     comingSoon: false,
     url: 'https://dmv.ny.gov/non-driver-id/replace-a-non-driver-id?utm_source=chatgpt.com',
     gradient: ['#6B7280', '#4B5563'] as [string, string],
   },
   {
     id: 'shelter',
-    title: 'Find a Shelter',
-    description: 'Directory of NYC homeless shelters',
     url: 'https://www1.nyc.gov/site/dhs/shelter/shelter.page',
     gradient: ['#22C55E', '#15803D'] as [string, string],
   },
   {
     id: 'medical',
-    title: 'Medical Care',
-    description: 'Free and low-cost healthcare options',
     url: 'https://www.nychealthandhospitals.org/',
     gradient: ['#FF4B4B', '#D61C4E'] as [string, string],
   },
   {
     id: 'drug-checking',
-    title: 'Drug Checking & Testing',
-    description: 'Find sites in NYC where you can bring your drugs to get tested for safety. Main site: OnPoint NYC. More info and locations available.',
     url: 'https://onpointnyc.org/drug-checking/',
-    extraLinks: [
-      { label: 'OnPoint NYC Contact', url: 'https://onpointnyc.org/contact-us/' },
-      { label: 'NY State Health Drug Checking', url: 'https://www.health.ny.gov/diseases/aids/consumers/prevention/oduh/drug_checking.htm' },
-      { label: 'SACHR', url: 'https://www.sachr.org/' },
+    extraLinkKeys: ['onpointContact', 'nyStateHealth', 'sachr'],
+    extraLinkUrls: [
+      'https://onpointnyc.org/contact-us/',
+      'https://www.health.ny.gov/diseases/aids/consumers/prevention/oduh/drug_checking.htm',
+      'https://www.sachr.org/',
     ],
     gradient: ['#8B5CF6', '#6366F1'] as [string, string],
   },
   {
     id: 'narcan',
-    title: 'Get Free Narcan',
-    description: 'Find locations in NYC where you can get free Narcan (naloxone) to reverse opioid overdoses. Includes city and state resources.',
     url: 'https://www.nyc.gov/site/doh/health/health-topics/naloxone.page',
-    extraLinks: [
-      { label: 'NYC Naloxone (Narcan) Info', url: 'https://www.nyc.gov/site/doh/health/health-topics/naloxone.page' },
-      { label: 'NY State Naloxone (Narcan) Info', url: 'https://www.health.ny.gov/diseases/aids/general/opioid_overdose_prevention/directories.htm' },
+    extraLinkKeys: ['nycNaloxone', 'nyStateNaloxone'],
+    extraLinkUrls: [
+      'https://www.nyc.gov/site/doh/health/health-topics/naloxone.page',
+      'https://www.health.ny.gov/diseases/aids/general/opioid_overdose_prevention/directories.htm',
     ],
     gradient: ['#F59E42', '#F97316'] as [string, string],
   },
 ];
 
 export default function ResourcesScreen() {
+  const [language, setLanguage] = useState<Language>('En');
+
+  // Load language from storage
+  useEffect(() => {
+    AsyncStorage.getItem(LANGUAGE_KEY).then((stored) => {
+      if (stored === 'En' || stored === 'Es') {
+        setLanguage(stored);
+      }
+    });
+  }, []);
+
+  // Subscribe to language changes
+  useEffect(() => {
+    const interval = setInterval(() => {
+      AsyncStorage.getItem(LANGUAGE_KEY).then((stored) => {
+        if (stored === 'En' || stored === 'Es') {
+          setLanguage(stored);
+        }
+      });
+    }, 500);
+    return () => clearInterval(interval);
+  }, []);
+
+  const t = TRANSLATIONS[language];
+
+  // Map resources with translations
+  const getResource = (config: typeof RESOURCES_CONFIG[0]) => {
+    // Map resource IDs to translation keys
+    const idMap: Record<string, keyof typeof t.resources.items> = {
+      'snap': 'snap',
+      'id': 'id',
+      'shelter': 'shelter',
+      'medical': 'medical',
+      'drug-checking': 'drugChecking',
+      'narcan': 'narcan',
+    };
+    const translationKey = idMap[config.id] || config.id as keyof typeof t.resources.items;
+    const resourceData = t.resources.items[translationKey];
+    if (!resourceData) return null;
+
+    const resource: any = {
+      ...config,
+      title: resourceData.title,
+      description: resourceData.description,
+    };
+
+    // Add extra links if they exist
+    if (config.extraLinkKeys && config.extraLinkUrls && 'extraLinks' in resourceData) {
+      const extraLinksData = (resourceData as any).extraLinks;
+      resource.extraLinks = config.extraLinkKeys.map((key, index) => ({
+        label: extraLinksData[key as keyof typeof extraLinksData],
+        url: config.extraLinkUrls![index],
+      }));
+    }
+
+    return resource;
+  };
+
+  const RESOURCES = RESOURCES_CONFIG.map(getResource).filter(Boolean);
+
   const handlePress = (url?: string) => {
     if (url) {
       Linking.openURL(url).catch((err) => console.error('Error opening URL:', err));
@@ -76,8 +131,8 @@ export default function ResourcesScreen() {
       />
       <SafeAreaView style={styles.content}>
         <View style={styles.headerContainer}>
-          <Text style={styles.headerTitle}>Resources</Text>
-          <Text style={styles.headerSubtitle}>Access helpful services and information</Text>
+          <Text style={styles.headerTitle}>{t.resources.headerTitle}</Text>
+          <Text style={styles.headerSubtitle}>{t.resources.headerSubtitle}</Text>
         </View>
         <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
           {RESOURCES.map((resource) => (
@@ -86,7 +141,7 @@ export default function ResourcesScreen() {
               onPress={() => handlePress(resource.url)}
               disabled={resource.comingSoon}
               accessibilityLabel={resource.title}
-              accessibilityHint={`Opens information about ${resource.title}`}
+              accessibilityHint={`${t.resources.accessibility.opensInfo} ${resource.title}`}
               style={styles.cardContainer}>
               <LinearGradient
                 colors={resource.gradient}
@@ -111,12 +166,12 @@ export default function ResourcesScreen() {
                   {resource.comingSoon ? (
                     <View style={styles.comingSoonContainer}>
                       <AlertCircle color="#FF4B4B" size={16} />
-                      <Text style={styles.comingSoon}>Coming Soon</Text>
+                      <Text style={styles.comingSoon}>{t.resources.comingSoon}</Text>
                     </View>
                   ) : (
                     <View style={styles.linkContainer}>
                       <ExternalLink color="white" size={16} />
-                      <Text style={styles.linkText}>Learn More</Text>
+                      <Text style={styles.linkText}>{t.resources.learnMore}</Text>
                     </View>
                   )}
                 </View>
