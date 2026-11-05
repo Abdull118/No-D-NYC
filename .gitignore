@@ -29,6 +29,7 @@ yarn-error.*
 
 # local env files
 .env*.local
+atlas-credentials.env
 
 # typescript
 *.tsbuildinfo

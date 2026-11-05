@@ -1,0 +1,8 @@
+{
+  "name": "nod-api",
+  "private": true,
+  "main": "index.js",
+  "dependencies": {
+    "mongodb": "^6.20.0"
+  }
+}
