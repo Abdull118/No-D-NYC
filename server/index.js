@@ -71,18 +71,39 @@ async function main() {
   const server = http.createServer(async (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    const pathname = (req.url || '').split('?')[0];
     if (req.method === 'OPTIONS') {
       res.writeHead(204);
       res.end();
       return;
     }
-    if (req.method === 'GET' && (req.url === '/' || req.url === '/health')) {
+    if (req.method === 'GET' && (pathname === '/' || pathname === '/health')) {
       res.writeHead(204);
       res.end();
       return;
     }
-    if (req.method !== 'POST' || req.url !== '/pin-activity') {
+    if (req.method === 'GET' && pathname === '/pin-activity') {
+      try {
+        const rows = await col.find({}).sort({ created_at: 1 }).toArray();
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(rows.map((row) => ({
+          id: String(row._id),
+          device_id: row.device_id,
+          pin_id: row.pin_id,
+          city: row.city,
+          pin_type: row.pin_type,
+          directions: row.directions,
+          distance_km: row.distance_km,
+          created_at: row.created_at instanceof Date ? row.created_at.toISOString() : row.created_at,
+        }))));
+      } catch {
+        res.writeHead(500);
+        res.end();
+      }
+      return;
+    }
+    if (req.method !== 'POST' || pathname !== '/pin-activity') {
       res.writeHead(404);
       res.end();
       return;
