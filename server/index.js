@@ -22,9 +22,14 @@ function loadEnv(file) {
   }
 }
 
-loadEnv(path.join(__dirname, '..', 'atlas-credentials.env'));
+const envFile = path.join(__dirname, '..', 'atlas-credentials.env');
+if (fs.existsSync(envFile)) loadEnv(envFile);
 
 const uri = process.env.MONGODB_URI;
+if (!uri) {
+  console.error('MONGODB_URI is missing');
+  process.exit(1);
+}
 const client = new MongoClient(uri);
 const port = Number(process.env.PORT || 8787);
 
@@ -72,6 +77,11 @@ async function main() {
       res.end();
       return;
     }
+    if (req.method === 'GET' && (req.url === '/' || req.url === '/health')) {
+      res.writeHead(204);
+      res.end();
+      return;
+    }
     if (req.method !== 'POST' || req.url !== '/pin-activity') {
       res.writeHead(404);
       res.end();
@@ -96,9 +106,16 @@ async function main() {
     }
   });
 
-  server.listen(port, '0.0.0.0');
+  server.listen(port, '0.0.0.0', () => {
+    console.log(`listening on ${port}`);
+  });
 }
 
-main().catch(() => {
+main().catch((error) => {
+  const message = String(error && error.message ? error.message : error).replace(
+    /mongodb(\+srv)?:\/\/[^@\s]+@/g,
+    'mongodb$1://***@'
+  );
+  console.error(message);
   process.exit(1);
 });
